@@ -398,6 +398,17 @@
         }
         .search-input:focus { outline: none; border-color: var(--copper); box-shadow: 0 0 0 3px rgba(178, 118, 66, 0.1); }
 
+        .filter-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .filter-controls { flex-direction: column; gap: 15px; }
+        }
+
         .filter-container {
             display: flex;
             flex-wrap: wrap;
@@ -420,6 +431,15 @@
             color: var(--white);
             border-color: var(--forest-green);
         }
+        .filter-pill:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
+
+        .clear-filters {
+            background: none; border: none; font-size: 0.85rem; color: var(--sage);
+            cursor: pointer; text-decoration: underline; padding: 8px 0;
+            white-space: nowrap;
+        }
+        .clear-filters:hover { color: var(--copper); }
+        .clear-filters:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
 
         .results-meta {
             font-size: 0.9rem;
@@ -516,7 +536,7 @@
         /* Print Mode */
         @media print {
             body { background: white !important; color: black !important; font-size: 10pt; }
-            nav, .btt-btn, .search-container, .filter-container, .eq-details-btn { display: none !important; }
+            nav, .btt-btn, .search-container, .filter-controls, .eq-details-btn { display: none !important; }
 
             .hero { background: white; color: black; padding: 40px 0; border-bottom: 2px solid black; break-after: avoid;}
             .hero::before { display: none; }
@@ -536,7 +556,7 @@
             .feature-content, .eq-content { padding: 15px !important; }
 
             .eq-expanded-content { display: block !important; } /* Always show details in print */
-            .eq-grid { display: block; }
+            .explorer-grid { display: block; }
             .eq-card { display: block; width: 100%; margin-bottom: 15px; }
 
             .contact { background: white !important; color: black !important; break-before: always; padding: 40px 0 !important;}
@@ -638,9 +658,12 @@
                 <input type="text" id="searchInput" class="search-input" placeholder="Search by name, category, specification or keyword..." aria-label="Search equipment">
             </div>
 
-            <div class="filter-container" id="filter-container">
-                <button class="filter-pill active" data-cat="all">All Equipment</button>
-                <!-- Categories populated by JS -->
+            <div class="filter-controls">
+                <div class="filter-container" id="filter-container">
+                    <button class="filter-pill active" data-cat="all">All Equipment</button>
+                    <!-- Categories populated by JS -->
+                </div>
+                <button class="clear-filters" id="clearFiltersBtn">Clear filters</button>
             </div>
 
             <div class="results-meta" id="resultsCount">Loading technical catalogue...</div>
@@ -699,7 +722,7 @@
         // Using existing data with refined copy
         const equipmentData = [
             // Pre-processing
-            { name: "100 L Pre-treatment Vessel", category: "Pre-processing", manufacturerModel: "Biocatalysts / Custom", summary: "Pilot-scale vessel suitable for thermochemical pre-treatment of biomass and steam explosion.", details: "Designed for high temperature and pressure processing to disrupt lignocellulosic structures.", specs: ["100 L capacity", "High temperature rating", "High pressure rating"], applications: ["Lignocellulosic biomass breakdown", "Steam explosion", "Thermochemical pre-treatments"], tags: ["Pilot-scale", "Batch", "Biomass"], image: "assets/equipment/steam-explosion.jpg", featured: true },
+            { name: "100 L Pre-treatment Vessel", category: "Pre-processing", manufacturerModel: "Biocatalysts / Custom", summary: "Pilot-scale vessel suitable for thermochemical pre-treatment of biomass and steam explosion.", details: "Designed for high temperature and pressure processing to disrupt lignocellulosic structures.", specs: ["100 L capacity", "316L stainless steel", "Up to 12 bar", "Around 180°C", "Variable speed agitator", "Jacketed heating"], applications: ["Biomass pre-treatment", "Enzymatic hydrolysis", "Fibre expansion", "Steam explosion"], tags: ["Pilot-scale", "Batch", "Biomass"], image: "assets/equipment/steam-explosion.jpg", featured: true },
             { name: "Cutting Mill", category: "Pre-processing", manufacturerModel: "Various", summary: "Used for initial size reduction of bulky or long fibrous biomass streams.", details: "Provides primary breakdown of plant materials prior to fine milling.", specs: ["Adjustable screen sizes"], applications: ["Straw chopping", "Biomass size reduction"], tags: ["Milling", "Biomass"], image: "" },
             { name: "Hammer Mill", category: "Pre-processing", manufacturerModel: "Various", summary: "Impact milling designed for fine size reduction of brittle or fibrous materials.", details: "Produces fine particles suitable for extraction or chemical treatments.", specs: ["Interchangeable screen inserts"], applications: ["Fine biomass milling", "Powder generation"], tags: ["Milling", "Biomass"], image: "" },
             { name: "Granulator", category: "Pre-processing", manufacturerModel: "Various", summary: "Size reduction equipment designed to create consistent granules.", details: "Processes varied materials into uniform granules, enabling better downstream handling.", specs: [], applications: ["Granulation", "Material uniformization"], tags: ["Milling"], image: "" },
@@ -717,7 +740,7 @@
 
             // Distillation & Filtration
             { name: "Centritherm CT01-09RM Evaporator", category: "Concentration", manufacturerModel: "Flavourtech", summary: "Centrifugal thin-film evaporator designed for very short residence times.", details: "Enables low-temperature evaporation, preserving delicate heat-sensitive compounds.", specs: ["~1s residence time", "Low temperature operation", "Continuous flow"], applications: ["Extract concentration", "Solvent recovery", "Heat-sensitive processing"], tags: ["Continuous", "Pilot-scale", "Thermal"], image: "assets/equipment/centritherm.jpg", featured: true },
-            { name: "Flavourtech Spinning Cone", category: "Concentration", manufacturerModel: "Flavourtech", summary: "Spinning cone column designed for volatile recovery.", details: "Highly efficient counter-current steam stripping for capturing delicate aromas.", specs: ["Continuous operation", "Gentle steam stripping"], applications: ["Flavour recovery", "Aroma extraction"], tags: ["Continuous", "Pilot-scale", "Volatiles"], image: "" },
+
             { name: "VERSAflux Ultrafiltration Unit", category: "Filtration", manufacturerModel: "PCI Membranes", summary: "Cross-flow membrane filtration system.", details: "Versatile unit used for concentrating macromolecules or clarifying streams.", specs: ["Cross-flow design", "Various MWCO formats"], applications: ["Protein concentration", "Diafiltration"], tags: ["Pilot-scale", "Membrane"], image: "" },
             { name: "Guedu Filter Drier", category: "Filtration", manufacturerModel: "De Dietrich / Guedu", summary: "Agitated Nutsche filter drier suitable for isolation of solid products.", details: "Supports filtration, washing, and vacuum drying within a single enclosed vessel.", specs: ["Agitated", "Vacuum capable", "Heated jacket"], applications: ["Active ingredient isolation", "Precipitate recovery"], tags: ["Pilot-scale", "Batch", "Drying"], image: "" },
             { name: "Pope Nutsche Filter", category: "Filtration", manufacturerModel: "Pope Scientific", summary: "Bench/pilot-scale Nutsche filter.", details: "Enables pressurized or vacuum filtration in a controlled environment.", specs: ["Pressure/vacuum operation"], applications: ["Cake filtration", "Product washing"], tags: ["Bench-scale", "Batch"], image: "" },
@@ -782,7 +805,7 @@
         function getPlaceholderHtml(category) {
             return `
                 <div class="feature-image-container eq-img-area">
-                    <div class="image-pending">${category}<br><span style="font-size:0.65rem; opacity:0.7">Image pending</span></div>
+                    <div class="image-pending">Equipment image<br><span style="font-size:0.65rem; opacity:0.7">To be added</span></div>
                 </div>
             `;
         }
@@ -793,21 +816,19 @@
 
             container.innerHTML = featuredItems.map(item => `
                 <div class="feature-panel">
-                    ${item.image ? `<div class="feature-image-container"><img src="${item.image}" alt="${item.name}" class="feature-image"></div>` : getPlaceholderHtml(item.category)}
+                    ${item.image ? `<div class="feature-image-container"><img src="${item.image}" alt="${item.name}" class="feature-image" onerror="this.onerror=null; this.parentNode.innerHTML=getPlaceholderHtml(item.category);"></div>` : getPlaceholderHtml(item.category)}
                     <div class="feature-content">
                         <div class="feature-category">${item.category}</div>
                         <h3>${item.name}</h3>
                         <p class="feature-desc">${item.summary}</p>
 
                         <div class="mini-specs">
+                            ${item.specs.slice(0, 2).map(spec => `
                             <div>
-                                <span class="spec-label">Applications</span>
-                                <span class="spec-item">${item.applications[0] || 'Process dev'}</span>
+                                <span class="spec-label">Specification</span>
+                                <span class="spec-item">${spec}</span>
                             </div>
-                            <div>
-                                <span class="spec-label">Format</span>
-                                <span class="spec-item">${item.tags[0] || 'Standard'}</span>
-                            </div>
+                            `).join('')}
                         </div>
                         <p style="font-size: 0.9rem; color: var(--sage); margin:0;">${item.details}</p>
                     </div>
@@ -832,7 +853,7 @@
             const container = document.getElementById('eq-grid');
             const meta = document.getElementById('resultsCount');
 
-            meta.textContent = `Showing ${data.length} equipment items`;
+            meta.textContent = `Showing ${data.length} of ${equipmentData.length} equipment items`;
 
             if (data.length === 0) {
                 container.innerHTML = '<p style="grid-column: 1/-1; color: var(--sage);">No equipment found matching your criteria.</p>';
@@ -841,7 +862,7 @@
 
             container.innerHTML = data.map((item, index) => `
                 <div class="eq-card">
-                    ${item.image ? `<div class="eq-img-area"><img src="${item.image}" alt="${item.name}" class="eq-img"></div>` : getPlaceholderHtml(item.category)}
+                    ${item.image ? `<div class="eq-img-area"><img src="${item.image}" alt="${item.name}" class="eq-img" onerror="this.onerror=null; this.parentNode.innerHTML=getPlaceholderHtml(item.category);"></div>` : getPlaceholderHtml(item.category)}
                     <div class="eq-content">
                         <div class="eq-cat">${item.category}</div>
                         <h3 class="eq-title">${item.name}</h3>
@@ -894,6 +915,7 @@
         function setupSearchAndFilter() {
             const input = document.getElementById('searchInput');
             const pills = document.querySelectorAll('.filter-pill');
+            const clearBtn = document.getElementById('clearFiltersBtn');
             let currentCat = 'all';
 
             function filter() {
@@ -923,6 +945,16 @@
                     currentCat = e.target.dataset.cat;
                     filter();
                 });
+            });
+
+            clearBtn.addEventListener('click', () => {
+                input.value = '';
+                currentCat = 'all';
+                pills.forEach(p => {
+                    if (p.dataset.cat === 'all') p.classList.add('active');
+                    else p.classList.remove('active');
+                });
+                filter();
             });
         }
 
